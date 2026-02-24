@@ -15,14 +15,26 @@ import { SidebarMenuCollapsible } from "./SideBarManu"
 
 import { LogOut } from "lucide-react"
 import { Link, useLocation } from "react-router-dom"
+import { useEffect, useState } from "react"
+import { getQueryCount } from "@/api/query/query"
 
 export function AppSidebar() {
   const location = useLocation()
+  const [newQueryCount, setNewQueryCount] = useState(null)
 
   const isActive = (url: string) => {
     if (url === "/") return location.pathname === "/"
     return location.pathname.startsWith(url)
   }
+
+  useEffect(()=> {
+    (async () => {
+      const res = await getQueryCount()
+      console.log("Status count :  ",res)
+      setNewQueryCount(res.count)
+    }
+  )()
+  }, [])
 
   return (
     <Sidebar
@@ -34,12 +46,11 @@ export function AppSidebar() {
         <SidebarMenu>
           <SidebarMenuItem className="flex gap-2 p-0.5 pt-2" >
             <div className="h-8 w-8 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-white font-bold text-sm shrink-0">
-              A
+              M
             </div>
             <div className="flex flex-col min-w-0">
               <span className="text-base font-semibold leading-none truncate">
-                Admin Panel
-              </span>
+                Mdp Tours              </span>
               <span className="text-xs text-muted-foreground truncate">
                 Dashboard Management
               </span>
@@ -94,7 +105,7 @@ export function AppSidebar() {
                     <span>{item.title}</span>
                     {item.badge && (
                       <span className="ml-auto text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-md">
-                        {item.badge}
+                        {item.badge === "queries" ? newQueryCount :  typeof item.badge === "string" ? "" : item.badge}
                       </span>
                     )}
                   </Link>

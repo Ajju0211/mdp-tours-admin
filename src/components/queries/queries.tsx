@@ -1,98 +1,3 @@
-// "use client"
-
-// import * as React from "react"
-// import type {
-//   ColumnDef,
-//   SortingState,
-//   PaginationState,
-//   ColumnFiltersState,
-// } from "@tanstack/react-table"
-// import { DataTable } from "@/common/data-table"
-
-
-// type Package = {
-//   id: string
-//   title: string
-//   destinationName: string
-//   pricePerPerson: number
-//   category: string
-//   isActive: boolean
-// }
-
-// export default function PackagePage() {
-//   const [data, setData] = React.useState<Package[]>([])
-//   const [totalRows, setTotalRows] = React.useState(0)
-
-//   const [pagination, setPagination] =
-//     React.useState<PaginationState>({
-//       pageIndex: 0,
-//       pageSize: 10,
-//     })
-
-//   const [sorting, setSorting] =
-//     React.useState<SortingState>([])
-
-//   const [columnFilters, setColumnFilters] =
-//     React.useState<ColumnFiltersState>([])
-
-//   React.useEffect(() => {
-//     async function fetchData() {
-//       const response = await fetch("/api/packages")
-//       const json = await response.json()
-
-//       setData(json.data)
-//       setTotalRows(json.total)
-//     }
-
-//     fetchData()
-//   }, [pagination, sorting, columnFilters])
-
-//   const columns: ColumnDef<Package>[] = [
-//     {
-//       accessorKey: "title",
-//       header: "Title",
-//     },
-//     {
-//       accessorKey: "destinationName",
-//       header: "Destination",
-//     },
-//     {
-//       accessorKey: "pricePerPerson",
-//       header: "Price",
-//     },
-//     {
-//       accessorKey: "category",
-//       header: "Category",
-//     },
-//     {
-//       accessorKey: "isActive",
-//       header: "Active",
-//       cell: ({ row }) =>
-//         row.original.isActive ? "Yes" : "No",
-//     },
-//   ]
-
-//   return (
-//     <div className="p-6">
-//       <DataTable
-//         columns={columns}
-//         data={data}
-//         totalRows={totalRows}
-//         manualPagination
-//         manualSorting
-//         manualFiltering
-//         pagination={pagination}
-//         onPaginationChange={setPagination}
-//         sorting={sorting}
-//         onSortingChange={setSorting}
-//         columnFilters={columnFilters}
-//         onColumnFiltersChange={setColumnFilters}
-//       />
-//     </div>
-//   )
-// }
-
-
 "use client"
 
 import * as React from "react"
@@ -102,76 +7,21 @@ import type {
   PaginationState,
   ColumnFiltersState,
 } from "@tanstack/react-table"
+
 import { DataTable } from "@/common/data-table"
+import type { QueryItem } from "@/types/query"
+import { getAllQueries } from "@/api/query/query"
+import { QueryDetailsDialog } from "./QueryDetailsDialog"
 
-type Package = {
-  id: string
-  title: string
-  destinationName: string
-  pricePerPerson: number
-  category: string
-  isActive: boolean
-}
 
-export default function PackagePage() {
-  // ✅ Dummy Data
-  const mockData: Package[] = [
-    {
-      id: "1",
-      title: "Goa Beach Escape",
-      destinationName: "Goa",
-      pricePerPerson: 8999,
-      category: "Beach",
-      isActive: true,
-    },
-    {
-      id: "2",
-      title: "Manali Snow Adventure",
-      destinationName: "Manali",
-      pricePerPerson: 12999,
-      category: "Mountain",
-      isActive: true,
-    },
-    {
-      id: "3",
-      title: "Rajasthan Royal Tour",
-      destinationName: "Jaipur",
-      pricePerPerson: 15999,
-      category: "Heritage",
-      isActive: false,
-    },
-    {
-      id: "4",
-      title: "Kerala Backwaters",
-      destinationName: "Alleppey",
-      pricePerPerson: 10999,
-      category: "Nature",
-      isActive: true,
-    },
-    {
-      id: "5",
-      title: "Kashmir Paradise",
-      destinationName: "Srinagar",
-      pricePerPerson: 17999,
-      category: "Mountain",
-      isActive: false,
-    },
-    {
-      id: "6",
-      title: "Andaman Island Trip",
-      destinationName: "Andaman",
-      pricePerPerson: 19999,
-      category: "Beach",
-      isActive: true,
-    },
-  ]
-
-  const [data] = React.useState<Package[]>(mockData)
+export default function QueryPage() {
+  const [data, setData] = React.useState<QueryItem[]>([])
+  const [totalRows, setTotalRows] = React.useState(0)
 
   const [pagination, setPagination] =
     React.useState<PaginationState>({
       pageIndex: 0,
-      pageSize: 5,
+      pageSize: 10,
     })
 
   const [sorting, setSorting] =
@@ -180,30 +30,78 @@ export default function PackagePage() {
   const [columnFilters, setColumnFilters] =
     React.useState<ColumnFiltersState>([])
 
-  const columns: ColumnDef<Package>[] = [
+  const [loading, setLoading] = React.useState(false)
+
+  const [selectedQuery, setSelectedQuery] =
+    React.useState<QueryItem | null>(null)
+
+  const [dialogOpen, setDialogOpen] =
+    React.useState(false)
+
+
+
+  const handleRowClick = (row: QueryItem) => {
+    setSelectedQuery(row)
+    setDialogOpen(true)
+  }
+
+  async function fetchData() {
+    try {
+      setLoading(true)
+
+      const statusFilter = columnFilters.find(
+        (f) => f.id === "status"
+      )?.value as string | undefined
+
+      const response = await getAllQueries(
+        pagination.pageIndex + 1,
+        pagination.pageSize,
+        // statusFilter
+      )
+
+      setData(response.data)
+      setTotalRows(response.total)
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  React.useEffect(() => {
+    fetchData()
+  }, [pagination, sorting, columnFilters])
+
+
+  const columns: ColumnDef<QueryItem>[] = [
     {
-      accessorKey: "title",
-      header: "Title",
+      accessorKey: "fullName",
+      header: "Full Name",
     },
     {
-      accessorKey: "destinationName",
-      header: "Destination",
+      accessorKey: "email",
+      header: "Email",
     },
     {
-      accessorKey: "pricePerPerson",
-      header: "Price",
-      cell: ({ row }) => `₹ ${row.original.pricePerPerson}`,
+      accessorKey: "phone",
+      header: "Phone",
     },
     {
-      accessorKey: "category",
-      header: "Category",
+      accessorKey: "service",
+      header: "Service",
     },
     {
-      accessorKey: "isActive",
-      header: "Active",
+      accessorKey: "status",
+      header: "Status",
+      enableColumnFilter: true,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created",
       cell: ({ row }) =>
-        row.original.isActive ? "Yes" : "No",
+        new Date(row.original.createdAt).toLocaleDateString(),
     },
+
   ]
 
   return (
@@ -211,15 +109,26 @@ export default function PackagePage() {
       <DataTable
         columns={columns}
         data={data}
-
+        manualPagination
+       
+        totalRows={totalRows}
+        pageCount={Math.ceil(totalRows / pagination.pageSize)}
         pagination={pagination}
         onPaginationChange={setPagination}
-
         sorting={sorting}
         onSortingChange={setSorting}
-
         columnFilters={columnFilters}
         onColumnFiltersChange={setColumnFilters}
+        onRowClick={(row) => {
+          setSelectedQuery(row)
+          setDialogOpen(true)
+        }}
+      />
+       <QueryDetailsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        query={selectedQuery}
+        onStatusUpdate={fetchData}
       />
     </div>
   )

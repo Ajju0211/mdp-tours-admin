@@ -53,7 +53,8 @@ export default function AdminLayout() {
         <div className="flex items-center  border-b p-4">
           <SidebarTrigger />
           <div className="w-full h-full items-center justify-between gap-4 flex">
-          <h1 className="ml-4 font-semibold">Admin Panel </h1>
+          {/* <h1 className="ml-4 font-semibold">Admin Panel </h1> */}
+          <h1 className="ml-4 font-semibold"> </h1>
           
           <ModeToggle />
           </div>

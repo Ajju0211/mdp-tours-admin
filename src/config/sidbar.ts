@@ -1,3 +1,4 @@
+import type { SidebarGroupType } from "@/types/sidebar"
 import {
   LayoutDashboard,
   Users,
@@ -10,27 +11,6 @@ import {
   Backpack,
 } from "lucide-react"
 
-export type SidebarSubItem = {
-  title: string
-  url: string
-  icon?: LucideIcon
-  badge?: string | number
-  roles?: string[]
-}
-
-export type SidebarItem = {
-  title: string
-  icon: LucideIcon
-  url?: string              // normal link
-  items?: SidebarSubItem[]  // collapsible
-  badge?: string | number
-  roles?: string[]
-}
-
-export type SidebarGroupType = {
-  label: string
-  items: SidebarItem[]
-}
 export const sidebarConfig: SidebarGroupType[] = [
   {
     label: "Overview",
@@ -54,7 +34,7 @@ export const sidebarConfig: SidebarGroupType[] = [
       {
         title: "Queries",
         icon: MailQuestionMark,
-        badge: 3,
+        badge: "queries",
         url: "/query"
       },
 

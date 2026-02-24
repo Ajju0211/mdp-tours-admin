@@ -42,7 +42,6 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
 
-  /* Server side options */
   totalRows?: number
   pageCount?: number
   manualPagination?: boolean
@@ -57,6 +56,9 @@ interface DataTableProps<TData, TValue> {
 
   columnFilters?: ColumnFiltersState
   onColumnFiltersChange?: (updater: any) => void
+
+  // 🔥 ADD THIS
+  onRowClick?: (row: TData) => void
 }
 
 export function DataTable<TData, TValue>({
@@ -64,19 +66,16 @@ export function DataTable<TData, TValue>({
   data,
   totalRows,
   pageCount,
-
   manualPagination = false,
   manualSorting = false,
   manualFiltering = false,
-
   pagination = { pageIndex: 0, pageSize: 10 },
   onPaginationChange = () => {},
-
   sorting = [],
   onSortingChange = () => {},
-
   columnFilters = [],
   onColumnFiltersChange = () => {},
+  onRowClick, // 🔥 ADD HERE
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({})
@@ -206,10 +205,13 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className="cursor-pointer hover:bg-muted/50"
-                >
+                 <TableRow
+  key={row.id}
+  onClick={() => onRowClick?.(row.original)}   // 👈 THIS WAS MISSING
+  className={`hover:bg-muted/50 transition ${
+    onRowClick ? "cursor-pointer" : ""
+  }`}
+>
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(

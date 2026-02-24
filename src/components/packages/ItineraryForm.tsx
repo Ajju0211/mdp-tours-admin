@@ -60,7 +60,7 @@ export default function ItineraryForm({
   onSubmit: externalOnSubmit 
 }: ItineraryFormProps) {
   const form = useForm<FormValues>({
-    resolver: zodResolver(itinerarySchema),
+    resolver: zodResolver(itinerarySchema) as any,
     defaultValues: {
       packageId: packageId || "",
       days: initialData?.days || [

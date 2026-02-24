@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom"
 import AdminLayout from "./layouts/admin-layout"
-import Dashboard from "./pages/dashboard"
+import {Dashboard} from "./pages/dashboard"
 
 import { SignUp } from "./components/auth/sign-up"
 import { SignIn } from "./components/auth/sign-in"
