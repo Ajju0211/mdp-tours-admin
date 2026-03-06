@@ -17,7 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useNavigation } from 'react-router-dom'
 import { PasswordInput } from '../../password-input'
 import { useAuthStore } from '@/store/adminAuth.store'
 import { signIn } from '@/api/auth/auth'
@@ -43,7 +43,11 @@ export function UserAuthForm({
 }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { auth } = useAuthStore()
+  const { auth, } = useAuthStore()
+
+  if(auth.isAuthenticated) {
+    navigate('/')
+  }
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

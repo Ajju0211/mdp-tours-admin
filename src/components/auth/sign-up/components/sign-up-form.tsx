@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { PasswordInput } from '../../password-input'
 import { signUp } from '@/api/auth/auth'
+import { toast } from 'sonner'
 
 const formSchema = z
   .object({
@@ -54,8 +55,9 @@ export function SignUpForm({
     try{
       const res = await signUp(data.email, data.password)
       console.log('REsponse Data: ', res)
-    }catch(err) {
+    }catch(err : any) {
       console.log("error: ", err)
+      toast.error(err?.message || 'An error occurred while creating your account. Please try again.') 
     }finally{
       setIsLoading(false)
     }

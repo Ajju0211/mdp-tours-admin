@@ -1,9 +1,8 @@
-"use client"
+"use client";
 
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 
 import {
   Form,
@@ -13,98 +12,106 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
-import { Separator } from "@/components/ui/separator"
-import { 
-  Plus, 
-  Trash2, 
-  Save, 
-  MapPin, 
-  Camera, 
-  Video, 
-  Coffee, 
+import { Separator } from "@/components/ui/separator";
+import {
+  Plus,
+  Trash2,
+  Save,
+  MapPin,
+  Camera,
+  Video,
+  Coffee,
   UtensilsCrossed,
   Moon,
   Activity,
-  Navigation
-} from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
-import { itinerarySchema } from "@/schema/package.schema"
+  Navigation,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { itinerarySchema } from "@/schema/package.schema";
+import { useItineraryStore } from "@/store/itineraryStore";
+import { useEffect } from "react";
+import { usePackageStore } from "@/store/package.store";
+import { ImageUpload } from "../common/ImageUpload";
 
-type FormValues = z.infer<typeof itinerarySchema>
+type FormValues = z.infer<typeof itinerarySchema>;
 
 interface ItineraryFormProps {
-  packageId?: string
-  initialData?: Partial<FormValues>
-  onSubmit?: (data: FormValues) => void
+  packageId?: string;
+  initialData?: Partial<FormValues>;
+  onSubmit?: (data: any, packageData: any) => void;
+  isEditing: boolean;
 }
 
-export default function ItineraryForm({ 
-  packageId, 
-  initialData, 
-  onSubmit: externalOnSubmit 
+export default function ItineraryForm({
+  packageId,
+  initialData,
+  onSubmit: externalOnSubmit,
+  isEditing,
 }: ItineraryFormProps) {
+  const { itineraryFormData, setItineraryFormData, resetItineraryForm } =
+    useItineraryStore();
+  const { formData, setFormData, resetForm } = usePackageStore();
   const form = useForm<FormValues>({
     resolver: zodResolver(itinerarySchema) as any,
-    defaultValues: {
-      packageId: packageId || "",
-      days: initialData?.days || [
-        {
-          dayNumber: 1,
-          title: "",
-          description: "",
-          activities: [""],
-          images: [],
-          optionalActivities: [],
-          meals: {
-            breakfast: "",
-            lunch: "",
-            dinner: "",
-          },
-          location: {
-            lat: undefined,
-            lng: undefined,
-          },
-          transport: "",
-          videos: [],
-          notes: "",
-        },
-      ],
-    },
-  })
+    defaultValues: itineraryFormData,
+  });
+
+  // Sync form with Zustand whenever it changes
+  useEffect(() => {
+    const subscription = form.watch((values) => {
+      setItineraryFormData(values as FormValues);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setItineraryFormData]);
 
   // Field Arrays for days
   const days = useFieldArray({
     control: form.control,
     name: "days",
-  })
+  });
 
   const onSubmit = (data: FormValues) => {
-    console.log("SUBMITTED ITINERARY:", data)
+    console.log("SUBMITTED ITINERARY:", data);
+    console.log("SUBMITTED PACKAGE:", formData);
+    resetForm();
+    resetItineraryForm();
+
     if (externalOnSubmit) {
-      externalOnSubmit(data)
+      externalOnSubmit(data, formData);
     }
-  }
+  };
 
   const addNewDay = () => {
-    const currentDays = form.getValues("days")
-    const nextDayNumber = currentDays.length + 1
-    
+    const currentDays = form.getValues("days");
+    const nextDayNumber = currentDays.length + 1;
+
     days.append({
       dayNumber: nextDayNumber,
       title: "",
@@ -122,10 +129,10 @@ export default function ItineraryForm({
         lng: undefined,
       },
       transport: "",
-      videos: [],
+
       notes: "",
-    })
-  }
+    });
+  };
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4 md:px-6">
@@ -134,7 +141,9 @@ export default function ItineraryForm({
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Itinerary Planner</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isEditing ? "Edit Itinerary" : "Create Itinerary"}
+              </h1>
               <p className="text-muted-foreground">
                 Create a detailed day-by-day itinerary for your package
               </p>
@@ -148,7 +157,7 @@ export default function ItineraryForm({
           <Separator />
 
           {/* PACKAGE ID (hidden if provided) */}
-          {!packageId && (
+          {/* {!packageId && (
             <Card>
               <CardHeader>
                 <CardTitle>Package Association</CardTitle>
@@ -167,7 +176,8 @@ export default function ItineraryForm({
                         <Input placeholder="Enter package ID" {...field} />
                       </FormControl>
                       <FormDescription>
-                        The unique identifier of the package this itinerary belongs to
+                        The unique identifier of the package this itinerary
+                        belongs to
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -175,21 +185,23 @@ export default function ItineraryForm({
                 />
               </CardContent>
             </Card>
-          )}
+          )} */}
 
           {/* DAYS ITINERARY */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-semibold tracking-tight">Daily Schedule</h2>
+              <h2 className="text-2xl font-semibold tracking-tight">
+                Daily Schedule
+              </h2>
               <Badge variant="outline" className="text-sm">
-                {days.fields.length} {days.fields.length === 1 ? 'Day' : 'Days'}
+                {days.fields.length} {days.fields.length === 1 ? "Day" : "Days"}
               </Badge>
             </div>
 
             <Accordion type="multiple" className="space-y-4">
               {days.fields.map((dayField, dayIndex) => (
-                <AccordionItem 
-                  key={dayField.id} 
+                <AccordionItem
+                  key={dayField.id}
                   value={`day-${dayIndex}`}
                   className="border rounded-lg overflow-hidden bg-card"
                 >
@@ -200,7 +212,9 @@ export default function ItineraryForm({
                       </div>
                       <div className="flex-1 text-left">
                         <h3 className="font-semibold">
-                          Day {dayIndex + 1}: {form.watch(`days.${dayIndex}.title`) || "Untitled Day"}
+                          Day {dayIndex + 1}:{" "}
+                          {form.watch(`days.${dayIndex}.title`) ||
+                            "Untitled Day"}
                         </h3>
                         {form.watch(`days.${dayIndex}.location.lat`) && (
                           <p className="text-sm text-muted-foreground flex items-center gap-1">
@@ -211,7 +225,7 @@ export default function ItineraryForm({
                       </div>
                     </div>
                   </AccordionTrigger>
-                  
+
                   <AccordionContent className="px-6 pb-6 pt-2">
                     <div className="space-y-6">
                       {/* Day Header Actions */}
@@ -237,7 +251,10 @@ export default function ItineraryForm({
                             <FormItem>
                               <FormLabel>Day Title</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g., Arrival & City Tour" {...field} />
+                                <Input
+                                  placeholder="e.g., Arrival & City Tour"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -251,7 +268,10 @@ export default function ItineraryForm({
                             <FormItem>
                               <FormLabel>Transport</FormLabel>
                               <FormControl>
-                                <Input placeholder="e.g., Private AC Vehicle" {...field} />
+                                <Input
+                                  placeholder="e.g., Private AC Vehicle"
+                                  {...field}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -267,10 +287,10 @@ export default function ItineraryForm({
                           <FormItem>
                             <FormLabel>Day Description</FormLabel>
                             <FormControl>
-                              <Textarea 
+                              <Textarea
                                 placeholder="Describe the day's highlights and activities..."
                                 className="min-h-[100px]"
-                                {...field} 
+                                {...field}
                               />
                             </FormControl>
                             <FormMessage />
@@ -303,52 +323,77 @@ export default function ItineraryForm({
                         </TabsList>
 
                         {/* Activities Tab */}
-                        <TabsContent value="activities" className="space-y-6 pt-4">
+                        <TabsContent
+                          value="activities"
+                          className="space-y-6 pt-4"
+                        >
                           {/* Main Activities */}
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <FormLabel className="text-base">Main Activities</FormLabel>
+                              <FormLabel className="text-base">
+                                Main Activities
+                              </FormLabel>
                               <Badge variant="secondary">Required</Badge>
                             </div>
-                            
-                            {form.watch(`days.${dayIndex}.activities`)?.map((_, actIndex) => (
-                              <div key={actIndex} className="flex gap-3">
-                                <FormField
-                                  control={form.control}
-                                  name={`days.${dayIndex}.activities.${actIndex}`}
-                                  render={({ field }) => (
-                                    <FormItem className="flex-1">
-                                      <FormControl>
-                                        <Input placeholder={`Activity ${actIndex + 1}`} {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
+
+                            {form
+                              .watch(`days.${dayIndex}.activities`)
+                              ?.map((_, actIndex) => (
+                                <div key={actIndex} className="flex gap-3">
+                                  <FormField
+                                    control={form.control}
+                                    name={`days.${dayIndex}.activities.${actIndex}`}
+                                    render={({ field }) => (
+                                      <FormItem className="flex-1">
+                                        <FormControl>
+                                          <Input
+                                            placeholder={`Activity ${actIndex + 1}`}
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  {actIndex > 0 && (
+                                    <Button
+                                      type="button"
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => {
+                                        const currentActivities =
+                                          form.getValues(
+                                            `days.${dayIndex}.activities`,
+                                          );
+                                        const newActivities =
+                                          currentActivities.filter(
+                                            (_, i) => i !== actIndex,
+                                          );
+                                        form.setValue(
+                                          `days.${dayIndex}.activities`,
+                                          newActivities,
+                                        );
+                                      }}
+                                    >
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
                                   )}
-                                />
-                                {actIndex > 0 && (
-                                  <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="icon"
-                                    onClick={() => {
-                                      const currentActivities = form.getValues(`days.${dayIndex}.activities`)
-                                      const newActivities = currentActivities.filter((_, i) => i !== actIndex)
-                                      form.setValue(`days.${dayIndex}.activities`, newActivities)
-                                    }}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                )}
-                              </div>
-                            ))}
-                            
+                                </div>
+                              ))}
+
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                const currentActivities = form.getValues(`days.${dayIndex}.activities`) || []
-                                form.setValue(`days.${dayIndex}.activities`, [...currentActivities, ""])
+                                const currentActivities =
+                                  form.getValues(
+                                    `days.${dayIndex}.activities`,
+                                  ) || [];
+                                form.setValue(`days.${dayIndex}.activities`, [
+                                  ...currentActivities,
+                                  "",
+                                ]);
                               }}
                               className="gap-2"
                             >
@@ -359,44 +404,66 @@ export default function ItineraryForm({
 
                           {/* Optional Activities */}
                           <div className="space-y-4">
-                            <FormLabel className="text-base">Optional Activities</FormLabel>
-                            
-                            {form.watch(`days.${dayIndex}.optionalActivities`)?.map((_, optIndex) => (
-                              <div key={optIndex} className="flex gap-3">
-                                <FormField
-                                  control={form.control}
-                                  name={`days.${dayIndex}.optionalActivities.${optIndex}`}
-                                  render={({ field }) => (
-                                    <FormItem className="flex-1">
-                                      <FormControl>
-                                        <Input placeholder={`Optional Activity ${optIndex + 1}`} {...field} />
-                                      </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => {
-                                    const currentOptional = form.getValues(`days.${dayIndex}.optionalActivities`) || []
-                                    const newOptional = currentOptional.filter((_, i) => i !== optIndex)
-                                    form.setValue(`days.${dayIndex}.optionalActivities`, newOptional)
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
-                            
+                            <FormLabel className="text-base">
+                              Optional Activities
+                            </FormLabel>
+
+                            {form
+                              .watch(`days.${dayIndex}.optionalActivities`)
+                              ?.map((_, optIndex) => (
+                                <div key={optIndex} className="flex gap-3">
+                                  <FormField
+                                    control={form.control}
+                                    name={`days.${dayIndex}.optionalActivities.${optIndex}`}
+                                    render={({ field }) => (
+                                      <FormItem className="flex-1">
+                                        <FormControl>
+                                          <Input
+                                            placeholder={`Optional Activity ${optIndex + 1}`}
+                                            {...field}
+                                          />
+                                        </FormControl>
+                                        <FormMessage />
+                                      </FormItem>
+                                    )}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => {
+                                      const currentOptional =
+                                        form.getValues(
+                                          `days.${dayIndex}.optionalActivities`,
+                                        ) || [];
+                                      const newOptional =
+                                        currentOptional.filter(
+                                          (_, i) => i !== optIndex,
+                                        );
+                                      form.setValue(
+                                        `days.${dayIndex}.optionalActivities`,
+                                        newOptional,
+                                      );
+                                    }}
+                                  >
+                                    <Trash2 className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              ))}
+
                             <Button
                               type="button"
                               variant="outline"
                               size="sm"
                               onClick={() => {
-                                const currentOptional = form.getValues(`days.${dayIndex}.optionalActivities`) || []
-                                form.setValue(`days.${dayIndex}.optionalActivities`, [...currentOptional, ""])
+                                const currentOptional =
+                                  form.getValues(
+                                    `days.${dayIndex}.optionalActivities`,
+                                  ) || [];
+                                form.setValue(
+                                  `days.${dayIndex}.optionalActivities`,
+                                  [...currentOptional, ""],
+                                );
                               }}
                               className="gap-2"
                             >
@@ -419,7 +486,10 @@ export default function ItineraryForm({
                                     Breakfast
                                   </FormLabel>
                                   <FormControl>
-                                    <Input placeholder="e.g., Hotel Buffet" {...field} />
+                                    <Input
+                                      placeholder="e.g., Hotel Buffet"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -436,7 +506,10 @@ export default function ItineraryForm({
                                     Lunch
                                   </FormLabel>
                                   <FormControl>
-                                    <Input placeholder="e.g., Local Restaurant" {...field} />
+                                    <Input
+                                      placeholder="e.g., Local Restaurant"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -453,7 +526,10 @@ export default function ItineraryForm({
                                     Dinner
                                   </FormLabel>
                                   <FormControl>
-                                    <Input placeholder="e.g., Fine Dining" {...field} />
+                                    <Input
+                                      placeholder="e.g., Fine Dining"
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -463,7 +539,10 @@ export default function ItineraryForm({
                         </TabsContent>
 
                         {/* Location Tab */}
-                        <TabsContent value="location" className="space-y-4 pt-4">
+                        <TabsContent
+                          value="location"
+                          className="space-y-4 pt-4"
+                        >
                           <div className="grid md:grid-cols-2 gap-4">
                             <FormField
                               control={form.control}
@@ -472,12 +551,18 @@ export default function ItineraryForm({
                                 <FormItem>
                                   <FormLabel>Latitude</FormLabel>
                                   <FormControl>
-                                    <Input 
-                                      type="number" 
+                                    <Input
+                                      type="number"
                                       step="any"
                                       placeholder="e.g., 48.8566"
-                                      value={field.value || ''}
-                                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                      value={field.value || ""}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          e.target.value
+                                            ? Number(e.target.value)
+                                            : undefined,
+                                        )
+                                      }
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -492,12 +577,18 @@ export default function ItineraryForm({
                                 <FormItem>
                                   <FormLabel>Longitude</FormLabel>
                                   <FormControl>
-                                    <Input 
-                                      type="number" 
+                                    <Input
+                                      type="number"
                                       step="any"
                                       placeholder="e.g., 2.3522"
-                                      value={field.value || ''}
-                                      onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                                      value={field.value || ""}
+                                      onChange={(e) =>
+                                        field.onChange(
+                                          e.target.value
+                                            ? Number(e.target.value)
+                                            : undefined,
+                                        )
+                                      }
                                     />
                                   </FormControl>
                                   <FormMessage />
@@ -506,112 +597,117 @@ export default function ItineraryForm({
                             />
                           </div>
                           <FormDescription>
-                            Enter the coordinates for the main location of the day
+                            Enter the coordinates for the main location of the
+                            day
                           </FormDescription>
                         </TabsContent>
 
                         {/* Media Tab */}
+                        {/* Media Tab */}
                         <TabsContent value="media" className="space-y-6 pt-4">
-                          {/* Images */}
-                          <div className="space-y-4">
-                            <FormLabel className="text-base flex items-center gap-2">
-                              <Camera className="h-4 w-4" />
-                              Images
-                            </FormLabel>
-                            
-                            {form.watch(`days.${dayIndex}.images`)?.map((_, imgIndex) => (
-                              <div key={imgIndex} className="flex gap-3">
+                          <FormLabel className="text-base flex items-center gap-2">
+                            <Camera className="h-4 w-4" />
+                            Images
+                          </FormLabel>
+
+                          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                            {form
+                              .watch(`days.${dayIndex}.images`)
+                              ?.map((img, imgIndex) => (
                                 <FormField
+                                  key={imgIndex}
                                   control={form.control}
                                   name={`days.${dayIndex}.images.${imgIndex}`}
-                                  render={({ field }) => (
-                                    <FormItem className="flex-1">
+                                  render={({ field }: { field: any }) => (
+                                    <FormItem className="relative">
                                       <FormControl>
-                                        <Input placeholder="Image URL" {...field} />
+                                        <ImageUpload
+                                          value={field.value}
+                                          onChange={field.onChange} // update this slot
+                                          onRemove={() => {
+                                            const currentImages =
+                                              form.getValues(
+                                                `days.${dayIndex}.images`,
+                                              ) || [];
+                                            const newImages =
+                                              currentImages.filter(
+                                                (_, i) => i !== imgIndex,
+                                              );
+                                            form.setValue(
+                                              `days.${dayIndex}.images`,
+                                              newImages,
+                                            );
+                                          }}
+                                          multiple={false} // single image per slot
+                                          onUpload={async (file: File) => {
+                                            // Replace this with your actual cloud upload function
+                                            // should return { url, id, size } or match your ImageItemSchema
+                                            const uploaded =
+                                              await uploadFileToCloud(file);
+                                            return uploaded;
+                                          }}
+                                        />
                                       </FormControl>
-                                      <FormMessage />
-                                    </FormItem>
-                                  )}
-                                />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => {
-                                    const currentImages = form.getValues(`days.${dayIndex}.images`) || []
-                                    const newImages = currentImages.filter((_, i) => i !== imgIndex)
-                                    form.setValue(`days.${dayIndex}.images`, newImages)
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
-                            
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const currentImages = form.getValues(`days.${dayIndex}.images`) || []
-                                form.setValue(`days.${dayIndex}.images`, [...currentImages, ""])
-                              }}
-                              className="gap-2"
-                            >
-                              <Plus className="h-4 w-4" />
-                              Add Image
-                            </Button>
-                          </div>
 
-                          {/* Videos */}
-                          <div className="space-y-4">
-                            <FormLabel className="text-base flex items-center gap-2">
-                              <Video className="h-4 w-4" />
-                              Videos
-                            </FormLabel>
-                            
-                            {form.watch(`days.${dayIndex}.videos`)?.map((_, vidIndex) => (
-                              <div key={vidIndex} className="flex gap-3">
-                                <FormField
-                                  control={form.control}
-                                  name={`days.${dayIndex}.videos.${vidIndex}`}
-                                  render={({ field }) => (
-                                    <FormItem className="flex-1">
-                                      <FormControl>
-                                        <Input placeholder="Video URL (YouTube/Vimeo)" {...field} />
-                                      </FormControl>
+                                      <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute top-2 right-2"
+                                        onClick={() => {
+                                          const currentImages =
+                                            form.getValues(
+                                              `days.${dayIndex}.images`,
+                                            ) || [];
+                                          const newImages =
+                                            currentImages.filter(
+                                              (_, i) => i !== imgIndex,
+                                            );
+                                          form.setValue(
+                                            `days.${dayIndex}.images`,
+                                            newImages,
+                                          );
+                                        }}
+                                      >
+                                        <Trash2 className="h-4 w-4" />
+                                      </Button>
+
                                       <FormMessage />
                                     </FormItem>
                                   )}
                                 />
-                                <Button
-                                  type="button"
-                                  variant="outline"
-                                  size="icon"
-                                  onClick={() => {
-                                    const currentVideos = form.getValues(`days.${dayIndex}.videos`) || []
-                                    const newVideos = currentVideos.filter((_, i) => i !== vidIndex)
-                                    form.setValue(`days.${dayIndex}.videos`, newVideos)
-                                  }}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            ))}
-                            
-                            <Button
-                              type="button"
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                const currentVideos = form.getValues(`days.${dayIndex}.videos`) || []
-                                form.setValue(`days.${dayIndex}.videos`, [...currentVideos, ""])
-                              }}
-                              className="gap-2"
-                            >
-                              <Plus className="h-4 w-4" />
-                              Add Video
-                            </Button>
+                              ))}
+
+                            {/* Upload a new image slot */}
+                            <FormField
+                              control={form.control}
+                              name={`days.${dayIndex}.images.${form.watch(`days.${dayIndex}.images`)?.length || 0}`}
+                              render={({ field }: { field: any }) => (
+                                <FormItem>
+                                  <FormControl>
+                                    <ImageUpload
+                                      value={field.value}
+                                      onChange={(imgObj) => {
+                                        const currentImages =
+                                          form.getValues(
+                                            `days.${dayIndex}.images`,
+                                          ) || [];
+                                        form.setValue(
+                                          `days.${dayIndex}.images`,
+                                          [...currentImages, imgObj],
+                                        );
+                                      }}
+                                      multiple={false}
+                                      onUpload={async (file: File) => {
+                                        const uploaded =
+                                          await uploadFileToCloud(file);
+                                        return uploaded;
+                                      }}
+                                    />
+                                  </FormControl>
+                                </FormItem>
+                              )}
+                            />
                           </div>
                         </TabsContent>
 
@@ -624,10 +720,10 @@ export default function ItineraryForm({
                               <FormItem>
                                 <FormLabel>Additional Notes</FormLabel>
                                 <FormControl>
-                                  <Textarea 
+                                  <Textarea
                                     placeholder="Any special instructions or notes for this day..."
                                     className="min-h-[150px]"
-                                    {...field} 
+                                    {...field}
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -656,7 +752,7 @@ export default function ItineraryForm({
           </div>
 
           {/* Form Actions */}
-          <div className="flex justify-end gap-4 pt-6">
+          {/* <div className="flex justify-end gap-4 pt-6">
             <Button type="button" variant="outline" size="lg">
               Preview
             </Button>
@@ -664,9 +760,9 @@ export default function ItineraryForm({
               <Save className="h-4 w-4" />
               Save Itinerary
             </Button>
-          </div>
+          </div> */}
         </form>
       </Form>
     </div>
-  )
+  );
 }

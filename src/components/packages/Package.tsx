@@ -1,10 +1,9 @@
+"use client";
 
-"use client"
-
-import { useForm, useFieldArray } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { packageSchema } from "@/schema/package.schema"
+import { useForm, useFieldArray } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { packageSchema } from "@/schema/package.schema";
 
 import {
   Form,
@@ -14,69 +13,68 @@ import {
   FormControl,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import { Switch } from "@/components/ui/switch"
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 
-import { Separator } from "@/components/ui/separator"
-import { Plus, Trash2, Save } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Separator } from "@/components/ui/separator";
+import { Plus, Trash2, Save } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { usePackageStore } from "@/store/package.store";
+import { useEffect } from "react";
+import { ImageUpload } from "../common/ImageUpload";
+import type { UploadImageResponse } from "@/types/upload";
 
-type FormValues = z.infer<typeof packageSchema>
+type FormValues = z.infer<typeof packageSchema>;
 
-export default function PackageForm() {
+export default function PackageForm({
+  isEditing = false,
+}: {
+  isEditing?: boolean;
+}) {
+  const { formData, setFormData } = usePackageStore();
   const form = useForm<FormValues>({
     resolver: zodResolver(packageSchema),
-    defaultValues: {
-      title: "",
-      destinationName: "",
-      slug: "",
-      coverImage: "",
-      nights: 1,
-      days: 1,
-      pricePerPerson: 0,
-      discountPercent: 0,
-      category: "Family",
-      isActive: true,
-      isPublic: false,
-      inclusions: [],
-      exclusions: [],
-      availableDates: [],
-      description: "",
-      metaTitle: "",
-      metaDescription: "",
-    },
-  })
+    defaultValues: formData,
+  });
+
+  // Update Zustand whenever form changes
+  useEffect(() => {
+    const subscription = form.watch((values: any) => {
+      setFormData(values);
+    });
+    return () => subscription.unsubscribe();
+  }, [form, setFormData]);
 
   // Field Arrays
-  const inclusions = useFieldArray({
+  const inclusions = useFieldArray<any>({
     control: form.control,
     name: "inclusions",
-  })
+  });
 
-  const exclusions = useFieldArray({
+  const exclusions = useFieldArray<any>({
     control: form.control,
     name: "exclusions",
-  })
+  });
 
-  const dates = useFieldArray({
+  const dates = useFieldArray<any>({
     control: form.control,
     name: "availableDates",
-  })
+  });
 
   const onSubmit = (data: FormValues) => {
-    console.log("SUBMITTED DATA:", data)
-  }
+    console.log("SUBMITTED DATA:", data);
+  };
 
   return (
     <div className="container max-w-7xl mx-auto py-8 px-4 md:px-6">
@@ -85,13 +83,17 @@ export default function PackageForm() {
           {/* HEADER */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Create Package</h1>
-              <p className="text-muted-foreground">Fill in the details to create a new tour package</p>
+              <h1 className="text-3xl font-bold tracking-tight">
+                {isEditing ? "Edit Tour Package" : "Create New Tour Package"}
+              </h1>
+              <p className="text-muted-foreground">
+                Fill in the details to create a new tour package
+              </p>
             </div>
-            <Button type="submit" size="lg" className="gap-2">
+            {/* <Button type="submit" size="lg" className="gap-2">
               <Save className="h-4 w-4" />
               Save Package
-            </Button>
+            </Button> */}
           </div>
 
           <Separator />
@@ -110,7 +112,10 @@ export default function PackageForm() {
                     <FormItem>
                       <FormLabel>Title</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Romantic Paris Getaway" {...field} />
+                        <Input
+                          placeholder="e.g., Romantic Paris Getaway"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -133,7 +138,7 @@ export default function PackageForm() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name="slug"
                   render={({ field }) => (
@@ -146,16 +151,33 @@ export default function PackageForm() {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
                 <FormField
                   control={form.control}
                   name="coverImage"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Cover Image URL</FormLabel>
+                      <FormLabel>Cover Image</FormLabel>
                       <FormControl>
-                        <Input placeholder="https://example.com/image.jpg" {...field} />
+                        <ImageUpload
+                          value={field.value as UploadImageResponse | undefined} // single image
+                          onChange={(imageObj: UploadImageResponse) =>
+                            field.onChange(imageObj)
+                          }
+                          onRemove={() => field.onChange(undefined)}
+                          multiple={false} // single image only
+                          onUpload={async (file) => {
+                            // Your actual upload function returning UploadImageResponse
+                            const uploaded: UploadImageResponse = {
+                              url: "",
+                              key: "",
+                              size: 0,
+                            };
+                            // await uploadFileToCloud(file);
+                            return uploaded;
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -175,7 +197,9 @@ export default function PackageForm() {
                           type="number"
                           min={1}
                           value={field.value}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -194,7 +218,9 @@ export default function PackageForm() {
                           type="number"
                           min={1}
                           value={field.value}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -261,7 +287,9 @@ export default function PackageForm() {
                           type="number"
                           min={0}
                           value={field.value}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -281,7 +309,9 @@ export default function PackageForm() {
                           min={0}
                           max={100}
                           value={field.value}
-                          onChange={(e) => field.onChange(Number(e.target.value))}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
                         />
                       </FormControl>
                       <FormMessage />
@@ -295,7 +325,10 @@ export default function PackageForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Category</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select category" />
@@ -377,7 +410,10 @@ export default function PackageForm() {
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input placeholder="e.g., Hotel accommodation" {...field} />
+                            <Input
+                              placeholder="e.g., Hotel accommodation"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -420,7 +456,10 @@ export default function PackageForm() {
                       render={({ field }) => (
                         <FormItem className="flex-1">
                           <FormControl>
-                            <Input placeholder="e.g., Flight tickets" {...field} />
+                            <Input
+                              placeholder="e.g., Flight tickets"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -463,10 +502,10 @@ export default function PackageForm() {
                 render={({ field }) => (
                   <FormItem>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Describe the package in detail..." 
+                      <Textarea
+                        placeholder="Describe the package in detail..."
                         className="min-h-[150px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -506,10 +545,10 @@ export default function PackageForm() {
                   <FormItem>
                     <FormLabel>Meta Description</FormLabel>
                     <FormControl>
-                      <Textarea 
-                        placeholder="Brief description for search engines" 
+                      <Textarea
+                        placeholder="Brief description for search engines"
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormDescription>
@@ -532,5 +571,5 @@ export default function PackageForm() {
         </form>
       </Form>
     </div>
-  )
+  );
 }
