@@ -16,17 +16,17 @@ function AuthProfileLayout() {
     }
   };
 
-  // useLayoutEffect(() => {
-  //   console.log("AUth: ", auth)
-  //   if(!auth.isAuthenticated){
-  //   fetchUserProfile()
-  //   }
-  // }, [auth.isAuthenticated])
+  useLayoutEffect(() => {
+    console.log("AUth: ", auth);
+    if (!auth.isAuthenticated) {
+      fetchUserProfile();
+    }
+  }, [auth.isAuthenticated]);
 
   return (
-    <>
+    <div className="w-full h-full">
       <Outlet />
-    </>
+    </div>
   );
 }
 

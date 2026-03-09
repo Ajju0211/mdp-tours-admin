@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 
 import type {
   ColumnDef,
@@ -8,7 +8,7 @@ import type {
   ColumnFiltersState,
   VisibilityState,
   PaginationState,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
   flexRender,
@@ -17,7 +17,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
 import {
   Table,
@@ -26,61 +26,82 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
+} from "@/components/ui/table";
 
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
+import { Loader2Icon } from "lucide-react";
+
+type TableAction<T> = {
+  label: string;
+  onClick: (selectedRows: T[]) => void;
+};
 
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
+  isLoading?: boolean;
+  totalRows?: number;
+  pageCount?: number;
+  manualPagination?: boolean;
+  manualSorting?: boolean;
+  manualFiltering?: boolean;
+  actions?: TableAction<TData>[];
+  pagination?: PaginationState;
+  onPaginationChange?: (updater: any) => void;
 
-  totalRows?: number
-  pageCount?: number
-  manualPagination?: boolean
-  manualSorting?: boolean
-  manualFiltering?: boolean
+  sorting?: SortingState;
+  onSortingChange?: (updater: any) => void;
 
-  pagination?: PaginationState
-  onPaginationChange?: (updater: any) => void
+  columnFilters?: ColumnFiltersState;
+  onColumnFiltersChange?: (updater: any) => void;
 
-  sorting?: SortingState
-  onSortingChange?: (updater: any) => void
+  onRowClick?: (row: TData) => void;
 
-  columnFilters?: ColumnFiltersState
-  onColumnFiltersChange?: (updater: any) => void
-
-  // 🔥 ADD THIS
-  onRowClick?: (row: TData) => void
+  /* 🔥 NEW FLEXIBLE OPTIONS */
+  showGlobalFilter?: boolean;
+  showColumnFilters?: boolean;
+  renderTopToolbar?: React.ReactNode;
 }
-
 export function DataTable<TData, TValue>({
   columns,
   data,
   totalRows,
+  actions,
   pageCount,
+  isLoading,
   manualPagination = false,
   manualSorting = false,
   manualFiltering = false,
+
   pagination = { pageIndex: 0, pageSize: 10 },
   onPaginationChange = () => {},
+
   sorting = [],
   onSortingChange = () => {},
+
   columnFilters = [],
   onColumnFiltersChange = () => {},
-  onRowClick, // 🔥 ADD HERE
+
+  onRowClick,
+
+  showGlobalFilter = true,
+  showColumnFilters = true,
+  renderTopToolbar,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =
-    React.useState<VisibilityState>({})
+    React.useState<VisibilityState>({});
 
-  const [globalFilter, setGlobalFilter] = React.useState("")
+  const [globalFilter, setGlobalFilter] = React.useState("");
 
   const table = useReactTable({
     data,
@@ -107,31 +128,33 @@ export function DataTable<TData, TValue>({
     getCoreRowModel: getCoreRowModel(),
 
     // Enable client-side logic only when not manual
-    getFilteredRowModel: manualFiltering
-      ? undefined
-      : getFilteredRowModel(),
+    getFilteredRowModel: manualFiltering ? undefined : getFilteredRowModel(),
 
-    getSortedRowModel: manualSorting
-      ? undefined
-      : getSortedRowModel(),
+    getSortedRowModel: manualSorting ? undefined : getSortedRowModel(),
 
     getPaginationRowModel: manualPagination
       ? undefined
       : getPaginationRowModel(),
-  })
+  });
 
   return (
     <div className="space-y-4">
-
       {/* ================= TOP CONTROLS ================= */}
       <div className="flex items-center justify-between gap-4">
         {/* Global Search */}
-        <Input
-          placeholder="Search..."
-          value={globalFilter ?? ""}
-          onChange={(e) => setGlobalFilter(e.target.value)}
-          className="max-w-sm"
-        />
+        <div className="flex items-center gap-2">
+          {showGlobalFilter && (
+            <Input
+              placeholder="Search..."
+              value={globalFilter ?? ""}
+              onChange={(e) => setGlobalFilter(e.target.value)}
+              className="max-w-sm"
+            />
+          )}
+
+          {/* 🔥 Custom Buttons from Parent */}
+          {renderTopToolbar}
+        </div>
 
         {/* Column Visibility */}
         <DropdownMenu>
@@ -146,9 +169,7 @@ export function DataTable<TData, TValue>({
                 <DropdownMenuCheckboxItem
                   key={column.id}
                   checked={column.getIsVisible()}
-                  onCheckedChange={(value) =>
-                    column.toggleVisibility(!!value)
-                  }
+                  onCheckedChange={(value) => column.toggleVisibility(!!value)}
                 >
                   {column.id}
                 </DropdownMenuCheckboxItem>
@@ -163,7 +184,6 @@ export function DataTable<TData, TValue>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <React.Fragment key={headerGroup.id}>
-
                 {/* Header Row */}
                 <TableRow>
                   {headerGroup.headers.map((header) => (
@@ -172,7 +192,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   ))}
@@ -197,7 +217,6 @@ export function DataTable<TData, TValue>({
                     </TableHead>
                   ))}
                 </TableRow>
-
               </React.Fragment>
             ))}
           </TableHeader>
@@ -205,23 +224,35 @@ export function DataTable<TData, TValue>({
           <TableBody>
             {table.getRowModel().rows.length ? (
               table.getRowModel().rows.map((row) => (
-                 <TableRow
-  key={row.id}
-  onClick={() => onRowClick?.(row.original)}   // 👈 THIS WAS MISSING
-  className={`hover:bg-muted/50 transition ${
-    onRowClick ? "cursor-pointer" : ""
-  }`}
->
+                <TableRow
+                  key={row.id}
+                  onClick={() => onRowClick?.(row.original)} // 👈 THIS WAS MISSING
+                  className={`hover:bg-muted/50 transition ${
+                    onRowClick ? "cursor-pointer" : ""
+                  }`}
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
+            ) : isLoading ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className="text-center py-10"
+                >
+                  <div className="text-center py-10 flex gap-1 items-center justify-center">
+                    <span>Loading..</span>
+                    <Loader2Icon className="w-4 h-4  sm:w-4 sm:h-4 animate-spin" />
+                  </div>
+                </TableCell>
+              </TableRow>
             ) : (
               <TableRow>
                 <TableCell
@@ -238,7 +269,6 @@ export function DataTable<TData, TValue>({
 
       {/* ================= PAGINATION ================= */}
       <div className="flex items-center justify-between">
-
         <div className="text-sm text-muted-foreground">
           {manualPagination
             ? `Total: ${totalRows ?? 0}`
@@ -280,5 +310,5 @@ export function DataTable<TData, TValue>({
         </div>
       </div>
     </div>
-  )
+  );
 }

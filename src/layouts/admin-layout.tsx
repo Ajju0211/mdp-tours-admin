@@ -16,25 +16,25 @@ export default function AdminLayout() {
   const [loading, setLoading] = useState(false);
 
   // Fetch user info on mount
-  // useEffect(() => {
-  //   const initAuth = async () => {
-  //     try {
-  //       const res = await getProfile(); // calls /auth/me
-  //       if (res.user) {
-  //         auth.setUser(res.user);
-  //         auth.setIsAuthenticated(true);
-  //       } else {
-  //         auth.setIsAuthenticated(false);
-  //       }
-  //     } catch (err) {
-  //       auth.setIsAuthenticated(false);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
+  useEffect(() => {
+    const initAuth = async () => {
+      try {
+        const res = await getProfile(); // calls /auth/me
+        if (res.user) {
+          auth.setUser(res.user);
+          auth.setIsAuthenticated(true);
+        } else {
+          auth.setIsAuthenticated(false);
+        }
+      } catch (err) {
+        auth.setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //   initAuth();
-  // }, []);
+    initAuth();
+  }, []);
 
   if (loading) {
     return (
@@ -45,9 +45,9 @@ export default function AdminLayout() {
     );
   }
 
-  // if (!auth.isAuthenticated) {
-  //   return <Navigate to="/sign-in" replace />;
-  // }
+  if (!auth.isAuthenticated) {
+    return <Navigate to="/sign-in" replace />;
+  }
 
   // Authenticated → show admin layout
   return (

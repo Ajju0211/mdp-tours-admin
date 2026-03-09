@@ -1,77 +1,71 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import type {
   ColumnDef,
   SortingState,
   PaginationState,
   ColumnFiltersState,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 
-import { DataTable } from "@/common/data-table"
-import type { QueryItem } from "@/types/query"
-import { getAllQueries } from "@/api/query/query"
-import { QueryDetailsDialog } from "./QueryDetailsDialog"
-
+import { DataTable } from "@/common/data-table";
+import type { QueryItem } from "@/types/query";
+import { getAllQueries } from "@/api/query/query";
+import { QueryDetailsDialog } from "./QueryDetailsDialog";
 
 export default function QueryPage() {
-  const [data, setData] = React.useState<QueryItem[]>([])
-  const [totalRows, setTotalRows] = React.useState(0)
+  const [data, setData] = React.useState<QueryItem[]>([]);
+  const [totalRows, setTotalRows] = React.useState(0);
 
-  const [pagination, setPagination] =
-    React.useState<PaginationState>({
-      pageIndex: 0,
-      pageSize: 10,
-    })
+  const [pagination, setPagination] = React.useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: 10,
+  });
 
-  const [sorting, setSorting] =
-    React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
 
-  const [columnFilters, setColumnFilters] =
-    React.useState<ColumnFiltersState>([])
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    [],
+  );
 
-  const [loading, setLoading] = React.useState(false)
+  const [loading, setLoading] = React.useState(false);
 
-  const [selectedQuery, setSelectedQuery] =
-    React.useState<QueryItem | null>(null)
+  const [selectedQuery, setSelectedQuery] = React.useState<QueryItem | null>(
+    null,
+  );
 
-  const [dialogOpen, setDialogOpen] =
-    React.useState(false)
-
-
+  const [dialogOpen, setDialogOpen] = React.useState(false);
 
   const handleRowClick = (row: QueryItem) => {
-    setSelectedQuery(row)
-    setDialogOpen(true)
-  }
+    setSelectedQuery(row);
+    setDialogOpen(true);
+  };
 
   async function fetchData() {
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const statusFilter = columnFilters.find(
-        (f) => f.id === "status"
-      )?.value as string | undefined
+      const statusFilter = columnFilters.find((f) => f.id === "status")
+        ?.value as string | undefined;
 
       const response = await getAllQueries(
         pagination.pageIndex + 1,
         pagination.pageSize,
         // statusFilter
-      )
+      );
 
-      setData(response.data)
-      setTotalRows(response.total)
+      setData(response.data);
+      setTotalRows(response.total);
     } catch (err) {
-      console.error(err)
+      console.error(err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
   React.useEffect(() => {
-    fetchData()
-  }, [pagination, sorting, columnFilters])
-
+    fetchData();
+  }, []);
 
   const columns: ColumnDef<QueryItem>[] = [
     {
@@ -98,19 +92,17 @@ export default function QueryPage() {
     {
       accessorKey: "createdAt",
       header: "Created",
-      cell: ({ row }) =>
-        new Date(row.original.createdAt).toLocaleDateString(),
+      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
     },
-
-  ]
+  ];
 
   return (
     <div className="p-6">
       <DataTable
+        isLoading={loading}
         columns={columns}
         data={data}
         manualPagination
-       
         totalRows={totalRows}
         pageCount={Math.ceil(totalRows / pagination.pageSize)}
         pagination={pagination}
@@ -120,16 +112,16 @@ export default function QueryPage() {
         columnFilters={columnFilters}
         onColumnFiltersChange={setColumnFilters}
         onRowClick={(row) => {
-          setSelectedQuery(row)
-          setDialogOpen(true)
+          setSelectedQuery(row);
+          setDialogOpen(true);
         }}
       />
-       <QueryDetailsDialog
+      <QueryDetailsDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         query={selectedQuery}
         onStatusUpdate={fetchData}
       />
     </div>
-  )
+  );
 }
