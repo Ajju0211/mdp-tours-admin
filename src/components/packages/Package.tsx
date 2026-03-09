@@ -28,7 +28,7 @@ import { useEffect, type Dispatch } from "react";
 import { ImageUpload } from "../common/ImageUpload";
 import type { UploadImageResponse } from "@/types/upload";
 import { handleImageRemove, handleImageUpload } from "@/utils/image-upload";
-import { categories } from "@/const/constaint";
+import { categories, destinationType } from "@/const/constaint";
 
 type FormValues = z.infer<typeof packageSchema>;
 
@@ -180,7 +180,7 @@ export default function PackageForm({
                 />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <FormField
                   control={form.control}
                   name="nights"
@@ -233,6 +233,20 @@ export default function PackageForm({
                             if (!field.value) field.onChange(0);
                           }}
                         />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="groupSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Group Size</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g., 2-12" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -378,6 +392,49 @@ export default function PackageForm({
                                 }}
                               />
                               {cat}
+                            </label>
+                          );
+                        })}
+                      </div>
+
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Destination Type</FormLabel>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        {destinationType.map((dt) => {
+                          const checked = field.value?.includes(dt);
+
+                          return (
+                            <label
+                              key={dt}
+                              className="flex items-center gap-2 border rounded-md p-3 cursor-pointer"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={checked}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    field.onChange([
+                                      ...(field.value || []),
+                                      dt,
+                                    ]);
+                                  } else {
+                                    field.onChange(
+                                      field.value.filter((t) => t !== dt),
+                                    );
+                                  }
+                                }}
+                              />
+                              {dt}
                             </label>
                           );
                         })}

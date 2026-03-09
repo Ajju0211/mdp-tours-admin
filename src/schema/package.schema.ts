@@ -1,4 +1,4 @@
-import { categories } from "@/const/constaint";
+import { categories, destinationType } from "@/const/constaint";
 import { z } from "zod";
 
 const ImageItemSchema = z.object({
@@ -12,6 +12,7 @@ export const packageSchema = z.object({
   destinationName: z.string().min(2),
   coverImage: ImageItemSchema.nullable(),
 
+  groupSize: z.string(),
   nights: z.number().min(1),
   days: z.number().min(1),
 
@@ -19,6 +20,7 @@ export const packageSchema = z.object({
   discountPercent: z.number().min(0).max(100),
 
   category: z.array(z.enum(categories)),
+  type: z.array(z.enum(destinationType)),
 
   isActive: z.boolean(),
   isPublic: z.boolean(),

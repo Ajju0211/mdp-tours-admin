@@ -9,7 +9,7 @@ export async function getAllPackages(
   isPublic?: boolean,
 ): Promise<GetPackagesResponse> {
   try {
-    const response = await api.get<GetPackagesResponse>("/packages", {
+    const response = await api.get<GetPackagesResponse>("/packages/admin", {
       params: {
         page,
         limit,
