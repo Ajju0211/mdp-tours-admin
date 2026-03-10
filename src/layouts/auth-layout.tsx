@@ -1,7 +1,7 @@
 import { getProfile } from "@/api/auth/auth";
 import { useAuthStore } from "@/store/adminAuth.store";
-import React, { useEffect, useLayoutEffect } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { useLayoutEffect } from "react";
+import { Outlet } from "react-router-dom";
 
 function AuthProfileLayout() {
   const { auth } = useAuthStore();

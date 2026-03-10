@@ -18,7 +18,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
@@ -36,7 +35,7 @@ export default function PackagesListPage() {
     pageSize: 10,
   });
 
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [_sorting, _setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     [],
   );
@@ -125,7 +124,7 @@ export default function PackagesListPage() {
     {
       accessorKey: "pricePerPerson",
       header: "Price Per Person",
-      cell: ({ row }) => `$${row.original.pricePerPerson}`,
+      cell: ({ row }) => `₹${row.original.pricePerPerson}`,
     },
     {
       accessorKey: "nights",

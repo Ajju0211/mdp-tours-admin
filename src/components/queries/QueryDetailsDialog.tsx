@@ -1,21 +1,32 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "sonner"
-import type { QueryItem } from "@/types/query"
-import { QueryStatus } from "@/enum/query-enum"
-import { queryStatus } from "@/config/query"
+import * as React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import type { QueryItem } from "@/types/query";
+
+import { queryStatus } from "@/config/query";
 
 interface Props {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  query: QueryItem | null
-  onStatusUpdate?: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  query: QueryItem | null;
+  onStatusUpdate?: () => void;
 }
 
 export function QueryDetailsDialog({
@@ -24,13 +35,13 @@ export function QueryDetailsDialog({
   query,
   onStatusUpdate,
 }: Props) {
-  const [status, setStatus] = React.useState(query?.status)
+  const [status, setStatus] = React.useState(query?.status);
 
   React.useEffect(() => {
-    setStatus(query?.status)
-  }, [query])
+    setStatus(query?.status);
+  }, [query]);
 
-  if (!query) return null
+  if (!query) return null;
 
   const handleStatusUpdate = async () => {
     try {
@@ -40,18 +51,18 @@ export function QueryDetailsDialog({
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ status }),
-        }
-      )
+        },
+      );
 
-      if (!res.ok) throw new Error()
+      if (!res.ok) throw new Error();
 
-      toast.success("Status updated successfully")
-      onStatusUpdate?.()
-      onOpenChange(false)
+      toast.success("Status updated successfully");
+      onStatusUpdate?.();
+      onOpenChange(false);
     } catch (error) {
-      toast.error("Failed to update status")
+      toast.error("Failed to update status");
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -61,7 +72,6 @@ export function QueryDetailsDialog({
         </DialogHeader>
 
         <div className="space-y-4 text-sm">
-
           <div>
             <p className="font-semibold">Full Name</p>
             <p>{query.fullName}</p>
@@ -96,14 +106,17 @@ export function QueryDetailsDialog({
           <div className="flex items-center justify-between">
             <Badge>{query.status}</Badge>
 
-            <Select value={status} onValueChange={(val) => setStatus(val as any)}>
+            <Select
+              value={status}
+              onValueChange={(val) => setStatus(val as any)}
+            >
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Change status" />
               </SelectTrigger>
               <SelectContent>
-               
-                {queryStatus.map((item) =>( <SelectItem value={item}>{item}</SelectItem>)  )}
-               
+                {queryStatus.map((item) => (
+                  <SelectItem value={item}>{item}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -114,5 +127,5 @@ export function QueryDetailsDialog({
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,12 +1,11 @@
-import AdminQueriesTable from '@/components/queries/queries'
-import React from 'react'
+import AdminQueriesTable from "@/components/queries/queries";
 
 function AdminQueriesPage() {
-    return (
-        <>
-            <AdminQueriesTable />
-        </>
-    )
+  return (
+    <>
+      <AdminQueriesTable />
+    </>
+  );
 }
 
-export default AdminQueriesPage
+export default AdminQueriesPage;

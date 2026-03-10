@@ -36,17 +36,12 @@ export default function QueryPage() {
 
   const [dialogOpen, setDialogOpen] = React.useState(false);
 
-  const handleRowClick = (row: QueryItem) => {
-    setSelectedQuery(row);
-    setDialogOpen(true);
-  };
-
   async function fetchData() {
     try {
       setLoading(true);
 
-      const statusFilter = columnFilters.find((f) => f.id === "status")
-        ?.value as string | undefined;
+      // const _statusFilter = columnFilters.find((f: any) => f.id === "status")
+      //   ?.value as string | undefined;
 
       const response = await getAllQueries(
         pagination.pageIndex + 1,

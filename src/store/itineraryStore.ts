@@ -1,6 +1,6 @@
 // stores/itineraryStore.ts
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+
 import { z } from "zod";
 import { dayPlanSchema } from "@/schema/package.schema";
 

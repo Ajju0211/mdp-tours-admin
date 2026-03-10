@@ -1,13 +1,10 @@
 import type { SidebarGroupType } from "@/types/sidebar"
 import {
   LayoutDashboard,
-  Users,
   Settings,
   BarChart3,
   Shield,
   MailQuestionMark,
-  UserPlus,
-  type LucideIcon,
   Backpack,
 } from "lucide-react"
 

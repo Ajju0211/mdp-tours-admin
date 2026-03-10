@@ -10,51 +10,31 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  ArrowUp,
-  ArrowDown,
   Users,
   ShoppingCart,
   DollarSign,
   Package,
-  Bell,
-  Settings,
-  User,
-  LogOut,
   TrendingUp,
   TrendingDown,
-  Calendar,
   Filter,
   Download,
 } from "lucide-react";
 
 export function Dashboard() {
-  const [timeRange, setTimeRange] = useState("week");
+  const [timeRange, _setTimeRange] = useState("week");
 
   // Dummy data
   const stats = [
     {
       title: "Total Revenue",
-      value: "$45,231.89",
+      value: "₹45,231.89",
       change: "+20.1%",
       trend: "up",
       icon: DollarSign,
@@ -91,7 +71,7 @@ export function Dashboard() {
       id: "#12345",
       customer: "John Doe",
       email: "john@example.com",
-      amount: "$235.00",
+      amount: "₹235.00",
       status: "completed",
       date: "2024-01-15",
     },
@@ -99,7 +79,7 @@ export function Dashboard() {
       id: "#12346",
       customer: "Jane Smith",
       email: "jane@example.com",
-      amount: "$421.00",
+      amount: "₹421.00",
       status: "processing",
       date: "2024-01-15",
     },
@@ -107,7 +87,7 @@ export function Dashboard() {
       id: "#12347",
       customer: "Bob Johnson",
       email: "bob@example.com",
-      amount: "$632.00",
+      amount: "₹632.00",
       status: "pending",
       date: "2024-01-14",
     },
@@ -115,7 +95,7 @@ export function Dashboard() {
       id: "#12348",
       customer: "Alice Brown",
       email: "alice@example.com",
-      amount: "$123.00",
+      amount: "₹123.00",
       status: "completed",
       date: "2024-01-14",
     },
@@ -123,18 +103,18 @@ export function Dashboard() {
       id: "#12349",
       customer: "Charlie Wilson",
       email: "charlie@example.com",
-      amount: "$754.00",
+      amount: "₹754.00",
       status: "cancelled",
       date: "2024-01-13",
     },
   ];
 
   const topProducts = [
-    { name: "Product A", sales: 1234, revenue: "$12,345", growth: "+15%" },
-    { name: "Product B", sales: 987, revenue: "$9,876", growth: "+8%" },
-    { name: "Product C", sales: 756, revenue: "$7,560", growth: "+12%" },
-    { name: "Product D", sales: 543, revenue: "$5,430", growth: "-3%" },
-    { name: "Product E", sales: 321, revenue: "$3,210", growth: "+5%" },
+    { name: "Product A", sales: 1234, revenue: "₹12,345", growth: "+15%" },
+    { name: "Product B", sales: 987, revenue: "₹9,876", growth: "+8%" },
+    { name: "Product C", sales: 756, revenue: "₹7,560", growth: "+12%" },
+    { name: "Product D", sales: 543, revenue: "₹5,430", growth: "-3%" },
+    { name: "Product E", sales: 321, revenue: "₹3,210", growth: "+5%" },
   ];
 
   const recentActivities = [
@@ -180,7 +160,6 @@ export function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      
       {/* Main Content */}
       <main className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Welcome Section */}
@@ -402,9 +381,7 @@ export function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Reports</CardTitle>
-                <CardDescription>
-                  Generate and view reports
-                </CardDescription>
+                <CardDescription>Generate and view reports</CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center border-2 border-dashed">
                 <p className="text-muted-foreground">

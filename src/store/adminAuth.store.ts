@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
+import { getCookie } from '@/lib/cookies'
 
 const ACCESS_TOKEN = 'thisisjustarandomstring'
 
@@ -28,8 +28,8 @@ export const useAuthStore = create<AuthState>()((set) => {
         set((state) => ({ ...state, auth: { ...state.auth, user } })),
       accessToken: initToken,
       isAuthenticated: false,
-    setIsAuthenticated: (value: boolean) =>
-      set((state) => ({ auth: { ...state.auth, isAuthenticated: value } })),
+      setIsAuthenticated: (value: boolean) =>
+        set((state) => ({ auth: { ...state.auth, isAuthenticated: value } })),
 
       reset: () =>
         set((state) => {

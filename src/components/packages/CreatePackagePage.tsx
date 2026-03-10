@@ -26,6 +26,7 @@ export default function SimpleTabs() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState("tab1");
   const [isPackagedFormFilled, setIsPackagedFormFilled] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   const onSubmit = async () => {
     // Validate that we have the minimum required data
@@ -106,11 +107,21 @@ export default function SimpleTabs() {
   };
 
   useEffect(() => {
-    if (isEditMode) {
-      // fetch existing data
-      fetchPackage(id!);
-    }
-  }, [id]);
+    const initializePage = async () => {
+      setIsReady(false);
+      if (id) {
+        // fetch existing data
+        await fetchPackage(id);
+      } else {
+        // Clear form when in create mode (e.g. Navigating from edit -> create)
+        resetForm();
+        resetItineraryForm();
+      }
+      setIsReady(true);
+    };
+
+    initializePage();
+  }, [id, resetForm, resetItineraryForm]);
 
   const handleTabChange = (value: string) => {
     if (value === "tab2") {
@@ -123,15 +134,20 @@ export default function SimpleTabs() {
 
   useEffect(() => {}, [itineraryFormData, formData]);
 
-  return isLoading && isEditMode ? (
-    <div className="w-full h-full">
-      <div className="mx-auto my-auto flex gap-1 items-center justify-center">
-        <span>Loading...</span>
-        <LoaderCircle className="animate-spin" />
+  if (!isReady || (isLoading && isEditMode)) {
+    return (
+      <div className="w-full h-[60vh] flex items-center justify-center">
+        <div className="flex gap-2 items-center text-muted-foreground">
+          <LoaderCircle className="animate-spin h-5 w-5" />
+          <span>Preparing form...</span>
+        </div>
       </div>
-    </div>
-  ) : (
+    );
+  }
+
+  return (
     <Tabs
+      key={id || "new"}
       value={activeTab}
       onValueChange={handleTabChange}
       defaultValue="tab1"

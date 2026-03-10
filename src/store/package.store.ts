@@ -1,6 +1,6 @@
 // stores/packageStore.ts
 import { create } from "zustand";
-import { string, z } from "zod";
+import { z } from "zod";
 import { packageSchema } from "@/schema/package.schema";
 
 type PackageFormValues = z.infer<typeof packageSchema>;

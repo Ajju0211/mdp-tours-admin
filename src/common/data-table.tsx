@@ -35,8 +35,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Loader2Icon } from "lucide-react";
@@ -76,7 +74,7 @@ export function DataTable<TData, TValue>({
   columns,
   data,
   totalRows,
-  actions,
+  // actions,
   pageCount,
   isLoading,
   manualPagination = false,
@@ -95,7 +93,7 @@ export function DataTable<TData, TValue>({
   onRowClick,
 
   showGlobalFilter = true,
-  showColumnFilters = true,
+  // showColumnFilters = true,
   renderTopToolbar,
 }: DataTableProps<TData, TValue>) {
   const [columnVisibility, setColumnVisibility] =

@@ -30,11 +30,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  ArrowUp,
-  ArrowDown,
   Users,
   ShoppingCart,
-  DollarSign,
+  IndianRupee,
   Package,
   Bell,
   Settings,
@@ -54,10 +52,10 @@ export function Dashboard() {
   const stats = [
     {
       title: "Total Revenue",
-      value: "$45,231.89",
+      value: "₹45,231.89",
       change: "+20.1%",
       trend: "up",
-      icon: DollarSign,
+      icon: IndianRupee,
       color: "text-green-500",
     },
     {
@@ -91,7 +89,7 @@ export function Dashboard() {
       id: "#12345",
       customer: "John Doe",
       email: "john@example.com",
-      amount: "$235.00",
+      amount: "₹235.00",
       status: "completed",
       date: "2024-01-15",
     },
@@ -99,7 +97,7 @@ export function Dashboard() {
       id: "#12346",
       customer: "Jane Smith",
       email: "jane@example.com",
-      amount: "$421.00",
+      amount: "₹421.00",
       status: "processing",
       date: "2024-01-15",
     },
@@ -107,7 +105,7 @@ export function Dashboard() {
       id: "#12347",
       customer: "Bob Johnson",
       email: "bob@example.com",
-      amount: "$632.00",
+      amount: "₹632.00",
       status: "pending",
       date: "2024-01-14",
     },
@@ -115,7 +113,7 @@ export function Dashboard() {
       id: "#12348",
       customer: "Alice Brown",
       email: "alice@example.com",
-      amount: "$123.00",
+      amount: "₹123.00",
       status: "completed",
       date: "2024-01-14",
     },
@@ -123,18 +121,18 @@ export function Dashboard() {
       id: "#12349",
       customer: "Charlie Wilson",
       email: "charlie@example.com",
-      amount: "$754.00",
+      amount: "₹754.00",
       status: "cancelled",
       date: "2024-01-13",
     },
   ];
 
   const topProducts = [
-    { name: "Product A", sales: 1234, revenue: "$12,345", growth: "+15%" },
-    { name: "Product B", sales: 987, revenue: "$9,876", growth: "+8%" },
-    { name: "Product C", sales: 756, revenue: "$7,560", growth: "+12%" },
-    { name: "Product D", sales: 543, revenue: "$5,430", growth: "-3%" },
-    { name: "Product E", sales: 321, revenue: "$3,210", growth: "+5%" },
+    { name: "Product A", sales: 1234, revenue: "₹12,345", growth: "+15%" },
+    { name: "Product B", sales: 987, revenue: "₹9,876", growth: "+8%" },
+    { name: "Product C", sales: 756, revenue: "₹7,560", growth: "+12%" },
+    { name: "Product D", sales: 543, revenue: "₹5,430", growth: "-3%" },
+    { name: "Product E", sales: 321, revenue: "₹3,210", growth: "+5%" },
   ];
 
   const recentActivities = [
@@ -187,7 +185,7 @@ export function Dashboard() {
             <Package className="h-6 w-6" />
             <span className="text-xl font-bold">DashFlow</span>
           </div>
-          
+
           <div className="ml-auto flex items-center space-x-4">
             {/* Time Range Selector */}
             <Select value={timeRange} onValueChange={setTimeRange}>
@@ -214,7 +212,10 @@ export function Dashboard() {
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/avatars/01.png" alt="@username" />
                     <AvatarFallback>JD</AvatarFallback>
@@ -471,9 +472,7 @@ export function Dashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Reports</CardTitle>
-                <CardDescription>
-                  Generate and view reports
-                </CardDescription>
+                <CardDescription>Generate and view reports</CardDescription>
               </CardHeader>
               <CardContent className="h-[400px] flex items-center justify-center border-2 border-dashed">
                 <p className="text-muted-foreground">

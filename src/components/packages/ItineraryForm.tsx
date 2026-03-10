@@ -17,13 +17,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { Separator } from "@/components/ui/separator";
 import {
@@ -32,21 +25,13 @@ import {
   Save,
   MapPin,
   Camera,
-  Video,
   Coffee,
   UtensilsCrossed,
   Moon,
   Activity,
-  Navigation,
   Loader2,
 } from "lucide-react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Accordion,
@@ -58,9 +43,11 @@ import { Badge } from "@/components/ui/badge";
 import { itinerarySchema } from "@/schema/package.schema";
 import { useItineraryStore } from "@/store/itineraryStore";
 import { useEffect } from "react";
-import { usePackageStore } from "@/store/package.store";
 import { ImageUpload } from "../common/ImageUpload";
 import { handleImageRemove, handleImageUpload } from "@/utils/image-upload";
+import { useParams } from "react-router-dom";
+import { usePackageStore } from "@/store/package.store";
+import { updatePackageWithItinerary } from "@/api/packages/package";
 
 type FormValues = z.infer<typeof itinerarySchema>;
 
@@ -73,18 +60,44 @@ interface ItineraryFormProps {
 }
 
 export default function ItineraryForm({
-  packageId,
-  initialData,
+  // packageId,
+  // initialData,
   onSubmit: externalOnSubmit,
   isEditing,
   isSubmitting = false,
 }: ItineraryFormProps) {
-  const { itineraryFormData, setItineraryFormData, resetItineraryForm } =
-    useItineraryStore();
+  const { itineraryFormData, setItineraryFormData } = useItineraryStore();
+  const { id } = useParams<{ id?: string }>();
+  const { formData } = usePackageStore();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(itinerarySchema) as any,
     defaultValues: itineraryFormData,
   });
+
+  const autoSaveItinerary = async (currentItineraryData: FormValues) => {
+    if (!isEditing || !id) return;
+
+    const reqData = {
+      ...formData,
+      inclusions: formData.inclusions?.filter((s: string) => s.trim()) ?? [],
+      exclusions: formData.exclusions?.filter((s: string) => s.trim()) ?? [],
+      availableDates:
+        formData.availableDates?.filter((s: string) => s.trim()) ?? [],
+      itineraryDays: currentItineraryData.days.map((day) => ({
+        ...day,
+        activities: day.activities?.filter((a) => a.trim()) ?? [],
+        optionalActivities:
+          day.optionalActivities?.filter((a) => a.trim()) ?? [],
+      })),
+    };
+
+    try {
+      await updatePackageWithItinerary(id, reqData);
+    } catch (err) {
+      console.error("Auto-save failed after image update:", err);
+    }
+  };
 
   // Sync form with Zustand whenever it changes
   useEffect(() => {
@@ -639,6 +652,13 @@ export default function ItineraryForm({
                                           : [images]
                                         : [];
                                       field.onChange(normalized);
+                                      if (isEditing) {
+                                        setTimeout(() => {
+                                          autoSaveItinerary(
+                                            form.getValues() as FormValues,
+                                          );
+                                        }, 500);
+                                      }
                                     }}
                                     onUpload={handleImageUpload}
                                     onRemove={handleImageRemove}

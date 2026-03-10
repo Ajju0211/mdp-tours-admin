@@ -8,7 +8,7 @@ import { toast } from "sonner";
 interface ImageUploadProps {
   value?: UploadImageResponse | UploadImageResponse[];
   onChange: (
-    value: UploadImageResponse | UploadImageResponse[] | undefined,
+    value: UploadImageResponse | UploadImageResponse[] | undefined | null,
   ) => void;
 
   multiple?: boolean;
@@ -88,12 +88,11 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       if (onRemove) await onRemove(file);
 
-      // Only update UI if the backend delete succeeded
       if (multiple) {
         const updated = files.filter((_, i) => i !== index);
         onChange(updated.length ? updated : undefined);
       } else {
-        onChange(undefined);
+        onChange(null);
       }
     } catch {
       // onRemove threw — keep the image in place, error toast already shown

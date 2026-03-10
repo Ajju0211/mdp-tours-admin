@@ -29,6 +29,9 @@ import { ImageUpload } from "../common/ImageUpload";
 import type { UploadImageResponse } from "@/types/upload";
 import { handleImageRemove, handleImageUpload } from "@/utils/image-upload";
 import { categories, destinationType } from "@/const/constaint";
+import { useParams } from "react-router-dom";
+import { useItineraryStore } from "@/store/itineraryStore";
+import { updatePackageWithItinerary } from "@/api/packages/package";
 
 type FormValues = z.infer<typeof packageSchema>;
 
@@ -42,10 +45,40 @@ export default function PackageForm({
   setIsPackagedFormFilled: Dispatch<React.SetStateAction<boolean>>;
 }) {
   const { formData, setFormData } = usePackageStore();
+  const { id } = useParams<{ id?: string }>();
+  const { itineraryFormData } = useItineraryStore();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(packageSchema),
     defaultValues: formData,
   });
+
+  const autoSavePackage = async (updatedPackageData: FormValues) => {
+    if (!isEditing || !id) return;
+
+    const reqData = {
+      ...updatedPackageData,
+      inclusions:
+        updatedPackageData.inclusions?.filter((s: string) => s.trim()) ?? [],
+      exclusions:
+        updatedPackageData.exclusions?.filter((s: string) => s.trim()) ?? [],
+      availableDates:
+        updatedPackageData.availableDates?.filter((s: string) => s.trim()) ??
+        [],
+      itineraryDays: itineraryFormData.days.map((day) => ({
+        ...day,
+        activities: day.activities?.filter((a) => a.trim()) ?? [],
+        optionalActivities:
+          day.optionalActivities?.filter((a) => a.trim()) ?? [],
+      })),
+    };
+
+    try {
+      await updatePackageWithItinerary(id, reqData);
+    } catch (err) {
+      console.error("Auto-save failed:", err);
+    }
+  };
 
   // Update Zustand whenever form changes
   useEffect(() => {
@@ -169,7 +202,14 @@ export default function PackageForm({
                         <ImageUpload
                           value={field.value as UploadImageResponse | undefined}
                           multiple={false}
-                          onChange={(image) => field.onChange(image)}
+                          onChange={(image) => {
+                            field.onChange(image);
+                            if (isEditing) {
+                              setTimeout(() => {
+                                autoSavePackage(form.getValues());
+                              }, 500);
+                            }
+                          }}
                           onUpload={handleImageUpload}
                           onRemove={handleImageRemove}
                         />
@@ -306,7 +346,7 @@ export default function PackageForm({
                   name="pricePerPerson"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price Per Person ($)</FormLabel>
+                      <FormLabel>Price Per Person (₹)</FormLabel>
                       <FormControl>
                         <Input
                           type="number"

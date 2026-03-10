@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import {
   SidebarProvider,
   SidebarInset,
@@ -13,8 +13,15 @@ import { ModeToggle } from "@/components/mode-toggle";
 
 export default function AdminLayout() {
   const { auth } = useAuthStore();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const location = useLocation();
 
+  useEffect(() => {
+    if (location.pathname === "/add-package") {
+      console.log("Component 'reloaded' logic runs here");
+      // call your reset functions or API calls here
+    }
+  }, [location.pathname]);
   // Fetch user info on mount
   useEffect(() => {
     const initAuth = async () => {
@@ -29,7 +36,9 @@ export default function AdminLayout() {
       } catch (err) {
         auth.setIsAuthenticated(false);
       } finally {
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
       }
     };
 
