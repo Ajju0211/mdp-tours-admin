@@ -220,7 +220,7 @@ export default function PackageForm({
                 />
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
                 <FormField
                   control={form.control}
                   name="nights"
@@ -281,12 +281,42 @@ export default function PackageForm({
 
                 <FormField
                   control={form.control}
-                  name="groupSize"
+                  name="minGroupSize"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Group Size</FormLabel>
+                      <FormLabel>Min Group Size</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., 2-12" {...field} />
+                        <Input
+                          type="number"
+                          min={1}
+                          value={field.value === 0 ? "" : field.value}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === "" ? 0 : Number(val));
+                          }}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="maxGroupSize"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Max Group Size</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          value={field.value === 0 ? "" : field.value}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            field.onChange(val === "" ? 0 : Number(val));
+                          }}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

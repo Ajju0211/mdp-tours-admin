@@ -12,7 +12,8 @@ export const packageSchema = z.object({
   destinationName: z.string().min(2),
   coverImage: ImageItemSchema.nullable(),
 
-  groupSize: z.string(),
+  minGroupSize: z.number().min(1),
+  maxGroupSize: z.number().min(1),
   nights: z.number().min(1),
   days: z.number().min(1),
 
