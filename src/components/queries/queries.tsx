@@ -80,6 +80,15 @@ export default function QueryPage() {
       header: "Service",
     },
     {
+      accessorKey: "package",
+      header: "Linked Tour",
+      cell: ({ row }) => (
+        <span className="max-w-[150px] truncate block">
+          {row.original.packageId ? row.original.packageId.title : "—"}
+        </span>
+      ),
+    },
+    {
       accessorKey: "status",
       header: "Status",
       enableColumnFilter: true,

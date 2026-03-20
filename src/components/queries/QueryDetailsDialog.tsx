@@ -92,6 +92,20 @@ export function QueryDetailsDialog({
             <p>{query.service}</p>
           </div>
 
+          {query.packageId && (
+            <div>
+              <p className="font-semibold">Linked Tour Package</p>
+              <a
+                href={`http://localhost:3000/packages/${query.packageId.slug}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:text-blue-800 hover:underline font-medium"
+              >
+                {query.packageId.title}
+              </a>
+            </div>
+          )}
+
           <Separator />
 
           <div>

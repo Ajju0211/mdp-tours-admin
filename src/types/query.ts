@@ -9,6 +9,11 @@ export interface QueryItem {
   service: string
   message: string
   status: QueryStatus
+  packageId?: {
+    _id: string
+    title: string
+    slug: string
+  }
   notes?: string
   createdAt: string
   updatedAt: string
