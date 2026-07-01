@@ -21,6 +21,8 @@ import { toast } from "sonner";
 import type { QueryItem } from "@/types/query";
 
 import { queryStatus } from "@/config/query";
+import { updateQueryStatus, deleteQuery } from "@/api/query/query";
+import type { QueryStatus } from "@/enum/query-enum";
 
 interface Props {
   open: boolean;
@@ -36,31 +38,47 @@ export function QueryDetailsDialog({
   onStatusUpdate,
 }: Props) {
   const [status, setStatus] = React.useState(query?.status);
+  const [isUpdating, setIsUpdating] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
   React.useEffect(() => {
-    setStatus(query?.status);
+    if (query) {
+      setStatus(query.status);
+    }
   }, [query]);
 
   if (!query) return null;
 
   const handleStatusUpdate = async () => {
+    setIsUpdating(true);
     try {
-      const res = await fetch(
-        `http://localhost:3000/api/v1/queries/${query._id}/status`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
-        },
-      );
-
-      if (!res.ok) throw new Error();
-
+      await updateQueryStatus(query._id, status as QueryStatus);
       toast.success("Status updated successfully");
       onStatusUpdate?.();
       onOpenChange(false);
-    } catch (error) {
-      toast.error("Failed to update status");
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to update status");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this query?");
+    if (!confirmDelete) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteQuery(query._id);
+      toast.success("Query deleted successfully");
+      onStatusUpdate?.();
+      onOpenChange(false);
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error.message || "Failed to delete query");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -135,9 +153,23 @@ export function QueryDetailsDialog({
             </Select>
           </div>
 
-          <Button onClick={handleStatusUpdate} className="w-full">
-            Update Status
-          </Button>
+          <div className="flex gap-2 w-full pt-2">
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={isDeleting || isUpdating}
+              className="flex-1"
+            >
+              {isDeleting ? "Deleting..." : "Delete Query"}
+            </Button>
+            <Button
+              onClick={handleStatusUpdate}
+              disabled={isDeleting || isUpdating}
+              className="flex-1"
+            >
+              {isUpdating ? "Updating..." : "Update Status"}
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

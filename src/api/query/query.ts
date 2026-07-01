@@ -64,3 +64,20 @@ export async function getQueryCount(): Promise<{
     }
   }
 }
+
+export async function deleteQuery(
+  id: string,
+): Promise<SingleQueryResponse> {
+  try {
+    const response = await api.delete<SingleQueryResponse>(`/queries/${id}`);
+
+    return response.data;
+  } catch (error: any) {
+    if (error.response) {
+      throw new Error(error.response.data.message || "Failed to delete query");
+    } else {
+      throw new Error(error.message || "Failed to delete query");
+    }
+  }
+}
+
