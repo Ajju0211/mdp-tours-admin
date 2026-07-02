@@ -14,17 +14,40 @@ import { sidebarConfig } from "@/config/sidbar";
 import { SidebarMenuCollapsible } from "./SideBarManu";
 
 import { LogOut } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { getQueryCount } from "@/api/query/query";
+import { signOut } from "@/api/auth/auth";
+import { useAuthStore } from "@/store/adminAuth.store";
+import { toast } from "sonner";
 
 export function AppSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { auth } = useAuthStore();
   const [newQueryCount, setNewQueryCount] = useState<number | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isActive = (url: string) => {
     if (url === "/") return location.pathname === "/";
     return location.pathname.startsWith(url);
+  };
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      await signOut();
+      auth.setIsAuthenticated(false);
+      auth.setUser(null);
+      auth.reset();
+      toast.success("Logged out successfully");
+      navigate("/sign-in");
+    } catch (error: any) {
+      toast.error(error.message || "Logout failed");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   useEffect(() => {
@@ -130,9 +153,13 @@ export function AppSidebar() {
       <SidebarFooter className="border-t p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="text-red-500 hover:text-red-600">
+            <SidebarMenuButton 
+              className="text-red-500 hover:text-red-600 disabled:opacity-50"
+              onClick={handleLogout}
+              disabled={isLoggingOut}
+            >
               <LogOut className="h-4 w-4" />
-              <span>Logout</span>
+              <span>{isLoggingOut ? "Logging out..." : "Logout"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

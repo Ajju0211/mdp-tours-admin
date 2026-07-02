@@ -72,7 +72,7 @@ export default function AdminLayout() {
             <ModeToggle />
           </div>
         </div>
-        <div className="p-6">
+        <div className="sm:p-6 p-2">
           <Outlet />
         </div>
       </SidebarInset>

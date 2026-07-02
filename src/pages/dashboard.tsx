@@ -163,7 +163,7 @@ export function Dashboard() {
       {/* Main Content */}
       <main className="flex-1 space-y-4 p-4 md:p-8 pt-6">
         {/* Welcome Section */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:gap-0 sm:flex-row items-start sm:items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
             <p className="text-muted-foreground">
@@ -228,7 +228,7 @@ export function Dashboard() {
             {/* Charts and Tables Grid */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
               {/* Revenue Chart Card */}
-              <Card className="col-span-4">
+              <Card className="col-span-1 md:col-span-2 lg:col-span-4">
                 <CardHeader>
                   <CardTitle>Revenue Overview</CardTitle>
                   <CardDescription>
@@ -243,7 +243,7 @@ export function Dashboard() {
               </Card>
 
               {/* Recent Activities Card */}
-              <Card className="col-span-3">
+              <Card className="col-span-1 md:col-span-2 lg:col-span-3">
                 <CardHeader>
                   <CardTitle>Recent Activity</CardTitle>
                   <CardDescription>
