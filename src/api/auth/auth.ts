@@ -22,8 +22,8 @@ export async function signUp(email: string, password: string): Promise<SignupRes
     const response = new Promise(() => {
       return {
         user: {
-          email: "[EMAIL_ADDRESS]",
-          role: "admin"
+          email: email,
+          password: password
         }
       }
     })
