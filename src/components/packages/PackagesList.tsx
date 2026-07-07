@@ -190,7 +190,7 @@ export default function PackagesListPage() {
         onPaginationChange={setPagination}
         columnFilters={columnFilters}
         onColumnFiltersChange={setColumnFilters}
-        onRowClick={handleRowClick}
+        onRowDoubleClick={handleRowClick}
         renderTopToolbar={
           <div className="flex gap-2">
             {/* Active Filter */}

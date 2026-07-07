@@ -115,7 +115,7 @@ export default function QueryPage() {
         onSortingChange={setSorting}
         columnFilters={columnFilters}
         onColumnFiltersChange={setColumnFilters}
-        onRowClick={(row) => {
+        onRowDoubleClick={(row) => {
           setSelectedQuery(row);
           setDialogOpen(true);
         }}

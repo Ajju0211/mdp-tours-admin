@@ -64,6 +64,7 @@ interface DataTableProps<TData, TValue> {
   onColumnFiltersChange?: (updater: any) => void;
 
   onRowClick?: (row: TData) => void;
+  onRowDoubleClick?: (row: TData) => void;
 
   /* 🔥 NEW FLEXIBLE OPTIONS */
   showGlobalFilter?: boolean;
@@ -91,6 +92,7 @@ export function DataTable<TData, TValue>({
   onColumnFiltersChange = () => {},
 
   onRowClick,
+  onRowDoubleClick,
 
   showGlobalFilter = true,
   // showColumnFilters = true,
@@ -100,6 +102,7 @@ export function DataTable<TData, TValue>({
     React.useState<VisibilityState>({});
 
   const [globalFilter, setGlobalFilter] = React.useState("");
+  const [selectedRowId, setSelectedRowId] = React.useState<string | null>(null);
 
   const table = useReactTable({
     data,
@@ -224,9 +227,16 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  onClick={() => onRowClick?.(row.original)} // 👈 THIS WAS MISSING
+                  onClick={() => {
+                    setSelectedRowId(row.id);
+                    onRowClick?.(row.original);
+                  }}
+                  onDoubleClick={() => {
+                    onRowDoubleClick?.(row.original);
+                  }}
+                  data-state={selectedRowId === row.id ? "selected" : undefined}
                   className={`hover:bg-muted/50 transition ${
-                    onRowClick ? "cursor-pointer" : ""
+                    onRowClick || onRowDoubleClick ? "cursor-pointer" : ""
                   }`}
                 >
                   {row.getVisibleCells().map((cell) => (
